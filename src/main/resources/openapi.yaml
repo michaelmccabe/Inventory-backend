@@ -5,6 +5,8 @@ info:
 tags:
   - name: Items
     description: Operations for managing inventory items
+  - name: Orders
+    description: Operations for managing orders
 paths:
   /api/items:
     get:
@@ -59,6 +61,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Item'
+    put:
+      tags:
+        - Items
+      summary: Update an item
+      operationId: updateItem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Item'
+      responses:
+        '200':
+          description: The updated item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
     delete:
       tags:
         - Items
@@ -74,6 +101,71 @@ paths:
       responses:
         '204':
           description: No content
+  /api/orders:
+    post:
+      tags:
+        - Orders
+      summary: Create a new order
+      operationId: createOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRequest'
+      responses:
+        '201':
+          description: The created order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+  /api/orders/{id}:
+    put:
+      tags:
+        - Orders
+      summary: Update an existing order
+      operationId: updateOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRequest'
+      responses:
+        '200':
+          description: The updated order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+  /api/orders/{id}/purchase:
+    post:
+      tags:
+        - Orders
+      summary: Purchase an existing order
+      operationId: purchaseOrder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: The purchased order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
 components:
   schemas:
     Item:
@@ -87,3 +179,41 @@ components:
           type: string
         quantity:
           type: integer
+    OrderRequest:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        deliveryAddress:
+          type: string
+    OrderItem:
+      type: object
+      properties:
+        itemId:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+    OrderStatus:
+      type: string
+      enum:
+        - SAVED
+        - PURCHASED
+        - HELD
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        deliveryAddress:
+          type: string
+        status:
+          $ref: '#/components/schemas/OrderStatus'
