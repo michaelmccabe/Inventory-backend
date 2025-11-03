@@ -47,4 +47,10 @@ public class ItemController implements ItemsApi {
                 .map(item -> new ResponseEntity<>(itemMapper.toApi(item), HttpStatus.OK))
                 .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
+    @Override
+    public ResponseEntity<Item> updateItem(Long id, Item item) {
+        com.mictech.model.Item updatedItem = itemService.updateItem(id, itemMapper.toEntity(item));
+        return new ResponseEntity<>(itemMapper.toApi(updatedItem), HttpStatus.OK);
+    }
 }

@@ -33,4 +33,11 @@ public class ItemService {
     public void deleteItem(Long id) {
         itemRepository.deleteById(id);
     }
+
+    public Item updateItem(Long id, Item item) {
+        Item existingItem = itemRepository.findById(id).orElseThrow(() -> new RuntimeException("Item not found: " + id));
+        existingItem.setName(item.getName());
+        existingItem.setQuantity(item.getQuantity());
+        return itemRepository.save(existingItem);
+    }
 }
