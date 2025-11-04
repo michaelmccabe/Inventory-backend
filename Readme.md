@@ -1,6 +1,7 @@
 # Inventory Service Microservice Template
 
-This project serves as a template for building well-structured, production-ready microservices in Java using the Spring Boot framework. It provides a solid foundation with a clear project structure, robust testing facilities, and best practices for modern Java development.
+This project serves as a template for building well-structured, production-ready microservices in Java using the Spring Boot framework. 
+It provides a solid foundation with a clear project structure, robust testing facilities, and best practices for modern Java development.
 
 ## Core Technologies
 
@@ -11,6 +12,7 @@ This project serves as a template for building well-structured, production-ready
 *   **Maven:** For dependency management and build automation.
 *   **Lombok:** To reduce boilerplate code.
 *   **MapStruct:** For mapping between DTOs and entities.
+*   **Java Virtual Threads (JVHs)::** For parallel processing.
 
 ## Project Structure
 
@@ -27,7 +29,8 @@ The project follows a standard Maven layout:
 The API is defined using the OpenAPI 3.0 specification.
 
 *   The definition file is located at `src/main/resources/openapi.yaml`.
-*   The `openapi-generator-maven-plugin` is used to generate the API interfaces and model classes (`com.mictech.api` and `com.mictech.api.model`) during the `generate-sources` phase of the Maven build. This ensures the implementation stays in sync with the API contract.
+*   The `openapi-generator-maven-plugin` is used to generate the API interfaces and model classes (`com.mictech.api` and `com.mictech.api.model`) 
+*   This ensures the implementation stays in sync with the API contract.
 
 ### Inventory Management
 
@@ -41,7 +44,8 @@ The inventory management API provides a set of endpoints for managing the items 
 
 ### Order Management
 
-The order management API has been designed to separate the creation and modification of orders from the final purchase action. This provides a clear and robust workflow for handling customer orders.
+The order management API has been designed to separate the creation and modification of orders from the final purchase action. 
+This provides a clear and robust workflow for handling customer orders.
 
 *   **`POST /api/orders` (Create Order):** Creates a new order with a `SAVED` status. The system checks for sufficient inventory before creating the order.
 *   **`PUT /api/orders/{id}` (Update Order):** Updates an existing order. The order must have a `SAVED` status to be updated.
@@ -53,7 +57,18 @@ Orders can be in one of the following statuses:
 
 *   **`SAVED`:** The order has been created but not yet purchased. It can be modified.
 *   **`PURCHASED`:** The order has been paid for, and the inventory has been updated.
-*   **`HELD`:** If an order cannot be purchased due to insufficient stock, its status is automatically changed to `HELD`. This allows for manual intervention or for the order to be reprocessed later.
+*   **`HELD`:** If an order cannot be purchased due to insufficient stock, its status is automatically changed to `HELD`.
+
+## Virtual Threads for Concurrent Shipping
+
+This project includes an optional feature to process the shipping of an order using Java's new virtual threads, introduced in Java 21. Virtual threads are a lightweight implementation of threads provided by the JDK, designed to dramatically reduce the effort of writing, maintaining, 
+and observing high-throughput concurrent applications. For more information, see the official [Java documentation on Virtual Threads](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html).
+
+The `testVirtualVsPlatformThreadPerformance` test in `VirtualThreadShippingTest.java` is designed to compare the performance of shipping a large order (1000 items) using both traditional platform threads and new virtual threads. It times both operations and logs the results.
+
+In this specific use case, which is heavily CPU-bound (logging to the console), the performance difference between virtual and platform threads may not be substantial. In fact, you might observe that platform threads are sometimes faster. 
+
+However, the real power of virtual threads shines in I/O-bound tasks, where the ability to easily parallelise a high number of operations can lead to significant performance gains.
 
 ## Database Migrations
 
@@ -64,7 +79,7 @@ Database schema changes are managed using **Flyway**.
 
 ## Testing Facilities
 
-This template is configured with a comprehensive testing strategy that includes both unit and integration tests.
+This template is configured with a comprehensive testing strategy.
 
 *   **JUnit 5:** The standard testing framework for Java.
 *   **Testcontainers:** This is a key feature of the template. For integration testing, Testcontainers is used to spin up a real PostgreSQL database inside a Docker container.
