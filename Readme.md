@@ -10,6 +10,7 @@ This project serves as a template for building well-structured, production-ready
 *   **PostgreSQL:** As the relational database.
 *   **Maven:** For dependency management and build automation.
 *   **Lombok:** To reduce boilerplate code.
+*   **MapStruct:** For mapping between DTOs and entities.
 
 ## Project Structure
 
@@ -28,6 +29,32 @@ The API is defined using the OpenAPI 3.0 specification.
 *   The definition file is located at `src/main/resources/openapi.yaml`.
 *   The `openapi-generator-maven-plugin` is used to generate the API interfaces and model classes (`com.mictech.api` and `com.mictech.api.model`) during the `generate-sources` phase of the Maven build. This ensures the implementation stays in sync with the API contract.
 
+### Inventory Management
+
+The inventory management API provides a set of endpoints for managing the items in the inventory.
+
+*   **`GET /api/items`:** Retrieves a list of all items in the inventory.
+*   **`POST /api/items`:** Creates a new item in the inventory.
+*   **`GET /api/items/{id}`:** Retrieves a specific item by its ID.
+*   **`PUT /api/items/{id}`:** Updates an existing item's information.
+*   **`DELETE /api/items/{id}`:** Removes an item from the inventory.
+
+### Order Management
+
+The order management API has been designed to separate the creation and modification of orders from the final purchase action. This provides a clear and robust workflow for handling customer orders.
+
+*   **`POST /api/orders` (Create Order):** Creates a new order with a `SAVED` status. The system checks for sufficient inventory before creating the order.
+*   **`PUT /api/orders/{id}` (Update Order):** Updates an existing order. The order must have a `SAVED` status to be updated.
+*   **`POST /api/orders/{id}/purchase` (Purchase Order):** Transitions an order to the `PURCHASED` status. This is the final step in the order process and will decrement the inventory.
+
+### Order Statuses
+
+Orders can be in one of the following statuses:
+
+*   **`SAVED`:** The order has been created but not yet purchased. It can be modified.
+*   **`PURCHASED`:** The order has been paid for, and the inventory has been updated.
+*   **`HELD`:** If an order cannot be purchased due to insufficient stock, its status is automatically changed to `HELD`. This allows for manual intervention or for the order to be reprocessed later.
+
 ## Database Migrations
 
 Database schema changes are managed using **Flyway**.
@@ -42,5 +69,5 @@ This template is configured with a comprehensive testing strategy that includes 
 *   **JUnit 5:** The standard testing framework for Java.
 *   **Testcontainers:** This is a key feature of the template. For integration testing, Testcontainers is used to spin up a real PostgreSQL database inside a Docker container.
     *   This allows tests to run against a live, ephemeral database, providing a high degree of confidence that the application will behave correctly in a production-like environment.
-    *   An example integration test, `ItemControllerIntegrationTest`, demonstrates how to set up and use the Testcontainer for testing controller endpoints and their interaction with the database layer.
+    *   The `OrderControllerIntegrationTest` provides a comprehensive set of tests for the order management workflow, including success and failure scenarios.
 *   **Test-specific Properties:** A separate configuration file at `src/test/resources/application-test.properties` is used to configure the application context for the testing environment, such as setting the datasource URL to point to the Testcontainer.
