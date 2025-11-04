@@ -159,6 +159,12 @@ paths:
           schema:
             type: integer
             format: int64
+        - name: virtual
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
       responses:
         '200':
           description: The purchased order

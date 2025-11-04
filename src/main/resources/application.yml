@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/inventory
+    username: user
+    password: password
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    locations: classpath:db/migration
+  threads:
+    virtual:
+      enabled: true

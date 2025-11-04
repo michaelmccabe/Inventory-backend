@@ -182,6 +182,39 @@ public class OrderControllerIntegrationTest {
                 .andExpect(jsonPath("$.quantity", is(10)));
     }
 
+    @Test
+    void testMultipleItemPurchaseOrder() throws Exception {
+        // 1. Create items
+        Item item1 = createItem("Item A", 500);
+        Item item2 = createItem("Item B", 600);
+        Item item3 = createItem("Item C", 1000);
+
+        // 2. Create an order
+        OrderRequest createRequest = new OrderRequest().deliveryAddress("789 Multi-Purchase Avenue");
+        createRequest.setItems(Arrays.asList(
+                new OrderItem().itemId(item1.getId()).quantity(100),
+                new OrderItem().itemId(item2.getId()).quantity(60),
+                new OrderItem().itemId(item3.getId()).quantity(90)
+        ));
+        Order createdOrder = createOrder(createRequest);
+
+        // 3. Purchase the order
+        mockMvc.perform(post("/api/orders/{id}/purchase", createdOrder.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status", is("PURCHASED")));
+
+        // 4. Verify item quantities
+        mockMvc.perform(get("/api/items/{id}", item1.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity", is(400)));
+        mockMvc.perform(get("/api/items/{id}", item2.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity", is(540)));
+        mockMvc.perform(get("/api/items/{id}", item3.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.quantity", is(910)));
+    }
+
     private Item createItem(String name, int quantity) throws Exception {
         Item item = new Item().name(name).quantity(quantity);
         MvcResult result = mockMvc.perform(post("/api/items")

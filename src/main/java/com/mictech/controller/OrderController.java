@@ -30,8 +30,8 @@ public class OrderController implements OrdersApi {
     }
 
     @Override
-    public ResponseEntity<Order> purchaseOrder(Long id) {
-        Order purchasedOrder = orderProcessor.purchaseOrder(id);
+    public ResponseEntity<Order> purchaseOrder(Long id, Boolean virtual) {
+        Order purchasedOrder = orderProcessor.purchaseOrder(id, virtual);
         return ResponseEntity.ok(purchasedOrder);
     }
 }

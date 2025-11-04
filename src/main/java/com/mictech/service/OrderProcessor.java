@@ -6,6 +6,7 @@ import com.mictech.exception.InsufficientStockException;
 import com.mictech.repository.ItemRepository;
 import com.mictech.repository.OrderRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +18,12 @@ public class OrderProcessor {
 
     private final OrderRepository orderRepository;
     private final ItemRepository itemRepository;
+    private final AsyncTaskExecutor taskExecutor;
 
-    public OrderProcessor(OrderRepository orderRepository, ItemRepository itemRepository) {
+    public OrderProcessor(OrderRepository orderRepository, ItemRepository itemRepository, AsyncTaskExecutor taskExecutor) {
         this.orderRepository = orderRepository;
         this.itemRepository = itemRepository;
+        this.taskExecutor = taskExecutor;
     }
 
     @Transactional
@@ -65,7 +68,7 @@ public class OrderProcessor {
     }
 
     @Transactional
-    public Order purchaseOrder(Long orderId) {
+    public Order purchaseOrder(Long orderId, boolean virtual) {
         log.info("Processing purchase for order {}...", orderId);
         com.mictech.model.Order dbOrder = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
@@ -105,7 +108,45 @@ public class OrderProcessor {
         }
 
         dbOrder = orderRepository.save(dbOrder);
+
+        if (virtual) {
+            shipItemsUsingVirtualThreads(dbOrder);
+        } else {
+            shipItems(dbOrder);
+        }
+
         return mapToApiOrder(dbOrder);
+    }
+
+    /**
+     * @deprecated Use {@link #shipItemsUsingVirtualThreads(com.mictech.model.Order)} instead.
+     */
+    @Deprecated
+    private void shipItems(com.mictech.model.Order dbOrder) {
+        if (dbOrder.getStatus() == com.mictech.model.OrderStatus.PURCHASED && dbOrder.getItems() != null) {
+            for (com.mictech.model.OrderItem orderItem : dbOrder.getItems()) {
+                com.mictech.model.Item item = itemRepository.findById(orderItem.getItemId())
+                        .orElseThrow(() -> new RuntimeException("Item not found: " + orderItem.getItemId()));
+                for (int i = 1; i <= orderItem.getQuantity(); i++) {
+                    log.info("Order shipping: item type {} and count = {} of {}", item.getName(), i, orderItem.getQuantity());
+                }
+            }
+        }
+    }
+
+    private void shipItemsUsingVirtualThreads(com.mictech.model.Order dbOrder) {
+        if (dbOrder.getStatus() == com.mictech.model.OrderStatus.PURCHASED && dbOrder.getItems() != null) {
+            for (com.mictech.model.OrderItem orderItem : dbOrder.getItems()) {
+                com.mictech.model.Item item = itemRepository.findById(orderItem.getItemId())
+                        .orElseThrow(() -> new RuntimeException("Item not found: " + orderItem.getItemId()));
+                for (int i = 1; i <= orderItem.getQuantity(); i++) {
+                    final int count = i;
+                    taskExecutor.execute(() -> {
+                        log.info("Order shipping on virtual thread: item type {} and count = {} of {}", item.getName(), count, orderItem.getQuantity());
+                    });
+                }
+            }
+        }
     }
 
     private Order mapToApiOrder(com.mictech.model.Order dbOrder) {
