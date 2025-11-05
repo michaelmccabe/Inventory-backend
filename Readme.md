@@ -86,3 +86,13 @@ This template is configured with a comprehensive testing strategy.
     *   This allows tests to run against a live, ephemeral database, providing a high degree of confidence that the application will behave correctly in a production-like environment.
     *   The `OrderControllerIntegrationTest` provides a comprehensive set of tests for the order management workflow, including success and failure scenarios.
 *   **Test-specific Properties:** A separate configuration file at `src/test/resources/application-test.yml` is used to configure the application context for the testing environment, such as setting the datasource URL to point to the Testcontainer.
+
+
+
+`docker run --name local-postgres \
+-e POSTGRES_PASSWORD=your_secure_password_here \
+-e POSTGRES_DB=inventory  # Optional: Creates a default DB (matches your template)
+-d \
+-p 5432:5432 \
+-v postgres_data:/var/lib/postgresql/data \
+postgres:latest`

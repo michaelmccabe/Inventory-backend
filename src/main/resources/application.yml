@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: inventory
   datasource:
     url: jdbc:postgresql://localhost:5432/inventory
     username: user
@@ -6,8 +8,34 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+    open-in-view: false  # Fixes the WARN (prod best practice)
   flyway:
     locations: classpath:db/migration
-  threads:
-    virtual:
+    threads:
+      virtual:
+        enabled: true
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0  # CRITICAL: Activates tracer + 100% capture
+  otlp:
+    tracing:
+      endpoint: http://localhost:4317
+  endpoints:
+    web:
+      exposure:
+        include: health,info,trace
+  endpoint:
+    health:
       enabled: true
+
+logging:
+  pattern:
+    level: '%d{yyyy-MM-dd HH:mm:ss} [%X{trace_id:-},%X{span_id:-}] %-5level %logger{36} - %msg%n'  # Enhanced pattern with timestamp
+  level:
+    root: INFO
+    io.micrometer.tracing: TRACE  # Max verbose for activation
+    io.opentelemetry: TRACE       # Full SDK (tracer init, spans)
+    io.opentelemetry.exporter.otlp: TRACE  # Export batches/errors
+    com.mictech: DEBUG            # App logic

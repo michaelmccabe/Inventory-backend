@@ -1,0 +1,27 @@
+receivers:
+  otlp:
+    protocols:
+      http:      # HTTP first, on standard 4317
+        endpoint: 0.0.0.0:4317
+      grpc:      # gRPC secondary, on 4318
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:  # Batch traces for efficiency (reduces network overhead)
+    timeout: 1s
+    send_batch_size: 1024
+
+exporters:
+  otlp/jaeger:  # REPLACED: Use OTLP to send to Jaeger (gRPC)
+    endpoint: "jaeger:4317"  # Jaeger's internal OTLP/gRPC port
+    tls:
+      insecure: true  # For local dev; secure in prod
+  debug:  # For console logging/debug (from previous fix)
+    verbosity: detailed  # basic for less noise
+
+service:
+  pipelines:
+    traces:  # Pipeline for traces only
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/jaeger, debug]  # Updated to use OTLP + debug

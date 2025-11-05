@@ -1,0 +1,12 @@
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0  # CRITICAL: Activates tracer + 100% capture
+  otlp:
+    tracing:
+      endpoint: http://localhost:4317
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:inventory},%X{trace_id:-},%X{span_id:-}]"

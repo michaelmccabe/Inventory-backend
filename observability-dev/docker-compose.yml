@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest  # Latest stable image
+    command: ["--config=/etc/otel-collector-config.yaml"]  # Points to our config
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro  # Mount config (read-only)
+    ports:
+      - "4317:4317"    # OTLP/HTTP (your app sends here)
+      - "4318:4318"    # OTLP/gRPC (alternative)
+      - "8888:8888"    # Metrics endpoint (for Collector health)
+      - "55680:55679"  # zPages (debug UI for Collector)
+    depends_on:
+      - jaeger  # Start Jaeger first
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest  # All-in-one Jaeger (query + storage)
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true  # Accept OTLP from Collector
+    ports:
+      - "16686:16686"   # Jaeger UI
+      - "14268:14268"   # gRPC for traces (Collector sends here)
+    volumes:
+      - jaeger_data:/tmp/jaeger  # Persist traces (optional)
+
+volumes:
+  jaeger_data:  # Named volume for Jaeger's in-memory storage
