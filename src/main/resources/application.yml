@@ -15,36 +15,17 @@ spring:
       virtual:
         enabled: true
 
-otel:
-  service:
-    name: inventory-service
-  resource:
-    attributes: service.namespace=com.mictech,service.version=1.0
-  traces:
-    exporter: otlp
-    sampler: parentbased_traceidratio
-    sampler.arg: 1.0
-  metrics:
-    exporter: otlp
-    export:
-      interval: 60000
-      timeout: 30000
-  logs:
-    exporter: otlp
-  exporter:
-    otlp:
-      endpoint: http://localhost:4317
-      protocol: grpc
-  propagators: tracecontext,baggage
-
 management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,trace
-  endpoint:
-    health:
-      enabled: true
+  tracing:
+    sampling:
+      probability: 1.0  # 100% capture
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces  # HTTP + path
+  # Batch tuning to avoid size errors
+  metrics:
+    export:
+      step: 30s
 
 logging:
   pattern:

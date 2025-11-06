@@ -87,12 +87,10 @@ This template is configured with a comprehensive testing strategy.
     *   The `OrderControllerIntegrationTest` provides a comprehensive set of tests for the order management workflow, including success and failure scenarios.
 *   **Test-specific Properties:** A separate configuration file at `src/test/resources/application-test.yml` is used to configure the application context for the testing environment, such as setting the datasource URL to point to the Testcontainer.
 
+## Observability
 
+To enhance monitoring and provide deeper insights into the application's behavior, this project is configured with OpenTelemetry, a leading open-source observability framework. By integrating with Spring Boot Actuator and Micrometer, the application is set up for distributed tracing and metrics collection. This allows for comprehensive monitoring of requests as they travel through the system, making it easier to diagnose performance bottlenecks and errors. The configuration includes an OTLP (OpenTelemetry Protocol) exporter, which sends telemetry data to a compatible backend, such as Jaeger or Zipkin, for visualization and analysis.
 
-`docker run --name local-postgres \
--e POSTGRES_PASSWORD=your_secure_password_here \
--e POSTGRES_DB=inventory  # Optional: Creates a default DB (matches your template)
--d \
--p 5432:5432 \
--v postgres_data:/var/lib/postgresql/data \
-postgres:latest`
+## Local Development
+
+To enable users to run this service locally, this project contains a folder `/local-dev` which has a docker environment with everything the service needs for its database layer and for testing the observability capabilities in the service.   
