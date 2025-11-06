@@ -4,6 +4,7 @@ import com.mictech.api.ItemsApi;
 import com.mictech.api.model.Item;
 import com.mictech.mapper.ItemMapper;
 import com.mictech.service.ItemService;
+import io.micrometer.observation.annotation.Observed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,7 @@ public class ItemController implements ItemsApi {
     }
 
     @Override
+    @Observed(name = "create.item", contextualName = "creating-item")  // Manual span
     public ResponseEntity<Item> createItem(Item item) {
         com.mictech.model.Item createdItem = itemService.createItem(itemMapper.toEntity(item));
         return new ResponseEntity<>(itemMapper.toApi(createdItem), HttpStatus.CREATED);
