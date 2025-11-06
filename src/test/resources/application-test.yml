@@ -1,11 +1,19 @@
-
 management:
   tracing:
     sampling:
       probability: 1.0  # CRITICAL: Activates tracer + 100% capture
   otlp:
     tracing:
-      endpoint: http://localhost:4317
+      endpoint: http://localhost:4317/v1/traces  # Full HTTP path for OTLP
+      transport: http/protobuf  # CRITICAL: Forces HTTP/Protobuf (no gRPC)
+  endpoints:
+    web:
+      exposure:
+        include: health,info,trace
+  endpoint:
+    health:
+      enabled: true
+
 
 logging:
   pattern:
