@@ -33,11 +33,11 @@ public class TracingTest {
     @Autowired
     private MockMvc mockMvc;
 
-//    @Test
-//    void testCorrelationIdPropagation() throws Exception {
-//        mockMvc.perform(get("/api/items")
-//                        .header("X-Correlation-ID", "test-correlation-id"))
-//                .andExpect(status().isOk())
-//                .andExpect(header().exists("result-id"));
-//    }
+    @Test
+    void testCorrelationIdPropagation() throws Exception {
+        mockMvc.perform(get("/api/items")
+                        .header("X-Correlation-ID", "test-correlation-id"))
+                .andExpect(status().isOk())
+                .andExpect(header().exists("Trace-Id"));
+    }
 }
