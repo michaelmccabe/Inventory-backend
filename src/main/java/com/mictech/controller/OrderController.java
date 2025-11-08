@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class OrderController implements OrdersApi {
+    // TODO: add list and get endpoints
 
     private final OrderProcessor orderProcessor;
 
