@@ -27,6 +27,10 @@ public class ItemService {
     }
 
     public Item createItem(Item item) {
+        // Check if item with the same name already exists
+        itemRepository.findByName(item.getName()).ifPresent(existingItem -> {
+            throw new RuntimeException("Item with name '" + item.getName() + "' already exists");
+        });
         return itemRepository.save(item);
     }
 
@@ -36,6 +40,14 @@ public class ItemService {
 
     public Item updateItem(Long id, Item item) {
         Item existingItem = itemRepository.findById(id).orElseThrow(() -> new RuntimeException("Item not found: " + id));
+        
+        // Check if another item with the same name already exists (excluding current item)
+        itemRepository.findByName(item.getName()).ifPresent(foundItem -> {
+            if (!foundItem.getId().equals(id)) {
+                throw new RuntimeException("Item with name '" + item.getName() + "' already exists");
+            }
+        });
+        
         existingItem.setName(item.getName());
         existingItem.setQuantity(item.getQuantity());
         return itemRepository.save(existingItem);
