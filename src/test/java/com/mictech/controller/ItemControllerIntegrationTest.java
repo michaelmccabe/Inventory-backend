@@ -88,6 +88,7 @@ public class ItemControllerIntegrationTest {
         mockMvc.perform(post("/api/items")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(item2)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$").value("Item with name 'Unique Item' already exists"));
     }
 }
