@@ -27,7 +27,6 @@ public class ItemController implements ItemsApi {
     @Override
     @Observed(name = "create.item", contextualName = "creating-item")  // Manual span
     public ResponseEntity<Item> createItem(Item item) {
-        // TODO: make name of item unique
         com.mictech.model.Item createdItem = itemService.createItem(itemMapper.toEntity(item));
         return new ResponseEntity<>(itemMapper.toApi(createdItem), HttpStatus.CREATED);
     }

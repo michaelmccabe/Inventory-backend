@@ -102,6 +102,20 @@ paths:
         '204':
           description: No content
   /api/orders:
+    get:
+      tags:
+        - Orders
+      summary: Get all orders
+      operationId: getAllOrders
+      responses:
+        '200':
+          description: A list of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
     post:
       tags:
         - Orders
@@ -121,6 +135,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/Order'
   /api/orders/{id}:
+    get:
+      tags:
+        - Orders
+      summary: Get an order by ID
+      operationId: getOrderById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: The order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          description: Order not found
     put:
       tags:
         - Orders

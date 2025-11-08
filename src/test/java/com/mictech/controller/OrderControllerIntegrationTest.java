@@ -215,6 +215,41 @@ public class OrderControllerIntegrationTest {
                 .andExpect(jsonPath("$.quantity", is(910)));
     }
 
+    @Test
+    void testGetAllOrders() throws Exception {
+        // 1. Create orders
+        OrderRequest request1 = new OrderRequest().deliveryAddress("Address 1");
+        OrderRequest request2 = new OrderRequest().deliveryAddress("Address 2");
+        createOrder(request1);
+        createOrder(request2);
+
+        // 2. Get all orders
+        mockMvc.perform(get("/api/orders"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.greaterThanOrEqualTo(2)));
+    }
+
+    @Test
+    void testGetOrderById() throws Exception {
+        // 1. Create an order
+        OrderRequest createRequest = new OrderRequest().deliveryAddress("Test Address");
+        Order createdOrder = createOrder(createRequest);
+
+        // 2. Get the order by ID
+        mockMvc.perform(get("/api/orders/{id}", createdOrder.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(createdOrder.getId().intValue())))
+                .andExpect(jsonPath("$.deliveryAddress", is("Test Address")))
+                .andExpect(jsonPath("$.status", is("SAVED")));
+    }
+
+    @Test
+    void testGetOrderByIdNotFound() throws Exception {
+        // Attempt to get a non-existent order
+        mockMvc.perform(get("/api/orders/{id}", 999999L))
+                .andExpect(status().isNotFound());
+    }
+
     private Item createItem(String name, int quantity) throws Exception {
         Item item = new Item().name(name).quantity(quantity);
         MvcResult result = mockMvc.perform(post("/api/items")

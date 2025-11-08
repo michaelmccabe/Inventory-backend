@@ -10,6 +10,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -116,6 +117,22 @@ public class OrderProcessor {
         }
 
         return mapToApiOrder(dbOrder);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Order> getAllOrders() {
+        log.info("Fetching all orders...");
+        List<com.mictech.model.Order> dbOrders = orderRepository.findAll();
+        return dbOrders.stream()
+                .map(this::mapToApiOrder)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public java.util.Optional<Order> getOrderById(Long orderId) {
+        log.info("Fetching order {}...", orderId);
+        return orderRepository.findById(orderId)
+                .map(this::mapToApiOrder);
     }
 
     /**

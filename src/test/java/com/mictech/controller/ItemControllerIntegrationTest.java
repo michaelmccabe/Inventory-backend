@@ -67,4 +67,28 @@ public class ItemControllerIntegrationTest {
                 .andExpect(jsonPath("$.name", is("Test Item")))
                 .andExpect(jsonPath("$.quantity", is(100)));
     }
+
+    @Test
+    void testCreateItemWithDuplicateName() throws Exception {
+        // 1. Create first item
+        Item item1 = new Item();
+        item1.setName("Unique Item");
+        item1.setQuantity(50);
+
+        mockMvc.perform(post("/api/items")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(item1)))
+                .andExpect(status().isCreated());
+
+        // 2. Attempt to create second item with the same name
+        Item item2 = new Item();
+        item2.setName("Unique Item");
+        item2.setQuantity(75);
+
+        mockMvc.perform(post("/api/items")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(item2)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$").value("Item with name 'Unique Item' already exists"));
+    }
 }

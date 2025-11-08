@@ -1,5 +1,6 @@
 package com.mictech.service;
 
+import com.mictech.exception.DuplicateItemNameException;
 import com.mictech.model.Item;
 import com.mictech.repository.ItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,10 @@ public class ItemService {
     }
 
     public Item createItem(Item item) {
+        // Check if item with the same name already exists
+        itemRepository.findByName(item.getName()).ifPresent(existingItem -> {
+            throw new DuplicateItemNameException("Item with name '" + item.getName() + "' already exists");
+        });
         return itemRepository.save(item);
     }
 
@@ -36,6 +41,14 @@ public class ItemService {
 
     public Item updateItem(Long id, Item item) {
         Item existingItem = itemRepository.findById(id).orElseThrow(() -> new RuntimeException("Item not found: " + id));
+        
+        // Check if another item with the same name already exists (excluding current item)
+        itemRepository.findByName(item.getName()).ifPresent(foundItem -> {
+            if (!foundItem.getId().equals(id)) {
+                throw new DuplicateItemNameException("Item with name '" + item.getName() + "' already exists");
+            }
+        });
+        
         existingItem.setName(item.getName());
         existingItem.setQuantity(item.getQuantity());
         return itemRepository.save(existingItem);
