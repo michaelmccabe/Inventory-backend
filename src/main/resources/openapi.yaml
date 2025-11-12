@@ -194,7 +194,7 @@ paths:
           schema:
             type: integer
             format: int64
-        - name: virtual
+        - name: useVirtualThreads
           in: query
           required: false
           schema:

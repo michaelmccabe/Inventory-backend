@@ -3,12 +3,14 @@ package com.mictech.service;
 import com.mictech.exception.DuplicateItemNameException;
 import com.mictech.model.Item;
 import com.mictech.repository.ItemRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class ItemService {
 
@@ -30,6 +32,7 @@ public class ItemService {
     public Item createItem(Item item) {
         // Check if item with the same name already exists
         itemRepository.findByName(item.getName()).ifPresent(existingItem -> {
+            log.warn("Attempted to create duplicate item with name: {}", item.getName());
             throw new DuplicateItemNameException("Item with name '" + item.getName() + "' already exists");
         });
         return itemRepository.save(item);
@@ -45,6 +48,7 @@ public class ItemService {
         // Check if another item with the same name already exists (excluding current item)
         itemRepository.findByName(item.getName()).ifPresent(foundItem -> {
             if (!foundItem.getId().equals(id)) {
+                log.warn("Attempted to update item with existing name: {}", item.getName());
                 throw new DuplicateItemNameException("Item with name '" + item.getName() + "' already exists");
             }
         });

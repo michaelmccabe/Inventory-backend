@@ -1,6 +1,7 @@
 package com.mictech.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mictech.TestClass;
 import com.mictech.api.model.Item;
 import com.mictech.api.model.Order;
 import com.mictech.api.model.OrderItem;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -28,10 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.hamcrest.Matchers.is;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@Testcontainers
-public class OrderControllerIntegrationTest {
+public class OrderControllerIntegrationTest extends TestClass {
 
     @Container
     private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:15-alpine");
