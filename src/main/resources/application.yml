@@ -31,8 +31,8 @@ logging:
   pattern:
     level: '%d{yyyy-MM-dd HH:mm:ss} [%X{trace_id:-},%X{span_id:-}] %-5level %logger{36} - %msg%n'  # Enhanced pattern with timestamp
   level:
-    root: INFO
-    io.micrometer.tracing: TRACE  # Max verbose for activation
-    io.opentelemetry: TRACE       # Full SDK (tracer init, spans)
-    io.opentelemetry.exporter.otlp: TRACE  # Export batches/errors
-    com.mictech: DEBUG            # App logic
+#    root: INFO
+#    io.micrometer.tracing: TRACE  # Max verbose for activation
+#    io.opentelemetry: TRACE       # Full SDK (tracer init, spans)
+#    io.opentelemetry.exporter.otlp: TRACE  # Export batches/errors
+    com.mictech: INFO            # App logic

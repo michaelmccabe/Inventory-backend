@@ -5,12 +5,14 @@ import com.mictech.api.model.Order;
 import com.mictech.api.model.OrderRequest;
 import com.mictech.service.OrderProcessor;
 import io.micrometer.observation.annotation.Observed;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 public class OrderController implements OrdersApi {
 
@@ -21,20 +23,25 @@ public class OrderController implements OrdersApi {
     }
 
     @Override
+    @Observed(name = "create.order", contextualName = "create-order")
     public ResponseEntity<Order> createOrder(OrderRequest orderRequest) {
+        log.debug("createOrder {}", orderRequest);
         Order createdOrder = orderProcessor.createOrUpdateOrder(null, orderRequest);
         return new ResponseEntity<>(createdOrder, HttpStatus.CREATED);
     }
 
     @Override
+    @Observed(name = "update.order", contextualName = "update-order")
     public ResponseEntity<Order> updateOrder(Long id, OrderRequest orderRequest) {
+        log.debug("updateOrder id: {}, orderRequest:  {}", id, orderRequest);
         Order updatedOrder = orderProcessor.createOrUpdateOrder(id, orderRequest);
         return ResponseEntity.ok(updatedOrder);
     }
 
     @Override
-    public ResponseEntity<Order> purchaseOrder(Long id, Boolean virtual) {
-        Order purchasedOrder = orderProcessor.purchaseOrder(id, virtual);
+    @Observed(name = "purchase.order", contextualName = "purchase-order")
+    public ResponseEntity<Order> purchaseOrder(Long id, Boolean useVirtualThreads) {
+        Order purchasedOrder = orderProcessor.purchaseOrder(id, useVirtualThreads);
         return ResponseEntity.ok(purchasedOrder);
     }
 

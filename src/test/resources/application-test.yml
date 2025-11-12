@@ -14,7 +14,9 @@ management:
     health:
       enabled: true
 
-
 logging:
   pattern:
-    level: "%5p [${spring.application.name:inventory},%X{trace_id:-},%X{span_id:-}]"
+    level: '%d{yyyy-MM-dd HH:mm:ss} [%X{trace_id:-},%X{span_id:-}] %-5level %logger{36} - %msg%n'  # Enhanced pattern with timestamp
+  level:
+    root: INFO
+    com.mictech: TRACE            # App logic

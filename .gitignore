@@ -31,3 +31,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Development Documentation ###
+further-development/
+

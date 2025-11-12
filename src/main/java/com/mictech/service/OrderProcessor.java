@@ -69,7 +69,7 @@ public class OrderProcessor {
     }
 
     @Transactional
-    public Order purchaseOrder(Long orderId, boolean virtual) {
+    public Order purchaseOrder(Long orderId, boolean useVirtualThreads) {
         log.info("Processing purchase for order {}...", orderId);
         com.mictech.model.Order dbOrder = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
@@ -110,7 +110,7 @@ public class OrderProcessor {
 
         dbOrder = orderRepository.save(dbOrder);
 
-        if (virtual) {
+        if (useVirtualThreads) {
             shipItemsUsingVirtualThreads(dbOrder);
         } else {
             shipItems(dbOrder);

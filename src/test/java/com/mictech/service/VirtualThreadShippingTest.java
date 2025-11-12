@@ -1,5 +1,6 @@
 package com.mictech.service;
 
+import com.mictech.TestClass;
 import com.mictech.api.model.Item;
 import com.mictech.api.model.Order;
 import com.mictech.api.model.OrderItem;
@@ -15,6 +16,7 @@ import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -27,10 +29,9 @@ import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@Testcontainers
+
 @ExtendWith(OutputCaptureExtension.class)
-public class VirtualThreadShippingTest {
+public class VirtualThreadShippingTest extends TestClass {
 
     private static final Logger log = LoggerFactory.getLogger(VirtualThreadShippingTest.class);
 
