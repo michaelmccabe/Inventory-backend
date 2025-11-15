@@ -1,0 +1,33 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: inventory-service
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: inventory-service
+          __path__: /logs/inventory-service.json
+    pipeline_stages:
+      - json:
+          expressions:
+            level: level
+            message: message
+            logger: logger_name
+            thread: thread_name
+            service_name: service_name
+            trace_id: traceId
+            span_id: spanId
+      - labels:
+          service_name:
+          level:
+      - output:
+          source: message

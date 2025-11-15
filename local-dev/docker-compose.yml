@@ -37,7 +37,8 @@ services:
 
   # Jaeger (All-in-One)
   jaeger:
-    image: jaegertracing/all-in-one:latest
+    image: jaegertracing/jaeger:2.1.0
+#    image: jaegertracing/all-in-one:latest
     container_name: jaeger
     ports:
       - "16686:16686"  # UI
@@ -45,6 +46,38 @@ services:
     environment:
       - COLLECTOR_OTLP_ENABLED=true
 
+  # Loki for log aggregation
+  loki:
+    image: grafana/loki:2.9.2
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+    volumes:
+      - loki-data:/loki
+
+  promtail:
+    image: grafana/promtail:2.9.2
+    container_name: promtail
+    volumes:
+      - ./promtail-config.yaml:/etc/promtail/config.yml
+      - ./logs:/logs:ro  # Read from shared logs directory
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+
 volumes:
   postgres_data:
-
+  loki-data:
+  grafana-data:

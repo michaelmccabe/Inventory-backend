@@ -10,12 +10,24 @@ processors:
   batch:  # Batch traces for efficiency (reduces network overhead)
     timeout: 1s
     send_batch_size: 1024
+  # Add resource processor to ensure service name is set
+  resource:
+    attributes:
+      - key: service.name
+        value: inventory-service
+        action: upsert
 
 exporters:
   otlp/jaeger:  # REPLACED: Use OTLP to send to Jaeger (gRPC)
     endpoint: "jaeger:4317"  # Jaeger's internal OTLP/gRPC port
     tls:
       insecure: true  # For local dev; secure in prod
+
+  otlphttp/loki:
+    endpoint: http://loki:3100/otlp
+    tls:
+      insecure: true
+
   debug:  # For console logging/debug (from previous fix)
     verbosity: detailed  # basic for less noise
 
@@ -23,5 +35,9 @@ service:
   pipelines:
     traces:  # Pipeline for traces only
       receivers: [otlp]
-      processors: [batch]
+      processors: [batch, resource]
       exporters: [otlp/jaeger, debug]  # Updated to use OTLP + debug
+    logs:  # UNCOMMENTED
+      receivers: [otlp]
+      processors: [batch, resource]
+      exporters: [otlphttp/loki, debug]
