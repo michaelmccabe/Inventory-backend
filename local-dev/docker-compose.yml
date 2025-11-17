@@ -38,7 +38,6 @@ services:
   # Jaeger (All-in-One)
   jaeger:
     image: jaegertracing/jaeger:2.1.0
-#    image: jaegertracing/all-in-one:latest
     container_name: jaeger
     ports:
       - "16686:16686"  # UI

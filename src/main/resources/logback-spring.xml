@@ -10,7 +10,7 @@
         </encoder>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="FILE_OLD" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>local-dev/logs/inventory-service.json</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>local-dev/logs/inventory-service.%d{yyyy-MM-dd}.json</fileNamePattern>
@@ -20,6 +20,20 @@
             <customFields>{"service_name":"${appName}"}</customFields>
             <includeContext>true</includeContext>
             <includeMdc>true</includeMdc>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>local-dev/logs/inventory-service.json</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>local-dev/logs/inventory-service.%d{yyyy-MM-dd}.json</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"service_name":"${appName}"}</customFields>
+            <!-- Flatten MDC to root level -->
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
         </encoder>
     </appender>
 
