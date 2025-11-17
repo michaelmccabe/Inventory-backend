@@ -76,5 +76,3 @@ You must first add Loki as a data source in Grafana:
 Next, in Grafana, you can use the following LogQL query to filter logs for `{service_name="inventory-service"}`.
 
 ![grafana-search.png](grafana-search.png)
-
-You 
