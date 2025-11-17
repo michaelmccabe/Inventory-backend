@@ -21,7 +21,9 @@ management:
       probability: 1.0  # 100% capture
   otlp:
     tracing:
-      endpoint: http://localhost:4318/v1/traces  # HTTP + path
+      endpoint: http://127.0.0.1:4318/v1/traces  # HTTP + path
+    logging:
+      endpoint: http://127.0.0.1:4318/v1/logs  # HTTP + path
   # Batch tuning to avoid size errors
   metrics:
     export:
@@ -29,10 +31,13 @@ management:
 
 logging:
   pattern:
-    level: '%d{yyyy-MM-dd HH:mm:ss} [%X{trace_id:-},%X{span_id:-}] %-5level %logger{36} - %msg%n'  # Enhanced pattern with timestamp
+    console: '%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] %-5level %logger{36} - %msg%n'  # Enhanced pattern with timestamp
   level:
-#    root: INFO
-#    io.micrometer.tracing: TRACE  # Max verbose for activation
-#    io.opentelemetry: TRACE       # Full SDK (tracer init, spans)
-#    io.opentelemetry.exporter.otlp: TRACE  # Export batches/errors
-    com.mictech: INFO            # App logic
+    io.micrometer.tracing: TRACE
+    io.opentelemetry: TRACE
+    io.opentelemetry.exporter: TRACE
+    io.opentelemetry.exporter.otlp: TRACE
+    io.opentelemetry.exporter.internal.http.HttpExporter: TRACE
+    io.opentelemetry.context.ContextStorageWrappers: TRACE
+    okhttp3.internal: TRACE
+    com.mictech: TRACE
