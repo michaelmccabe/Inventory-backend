@@ -23,7 +23,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.hamcrest.Matchers.is;
 
-public class ItemControllerIntegrationTest extends TestClass {
+@SpringBootTest
+@AutoConfigureMockMvc
+@Testcontainers
+@ActiveProfiles("test")
+public class ItemControllerIntegrationTest {
 
     @Container
     private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:15-alpine");
