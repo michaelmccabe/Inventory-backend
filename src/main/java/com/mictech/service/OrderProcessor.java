@@ -3,6 +3,8 @@ package com.mictech.service;
 import com.mictech.api.model.Order;
 import com.mictech.api.model.OrderRequest;
 import com.mictech.exception.InsufficientStockException;
+import com.mictech.model.Item;
+import com.mictech.model.OrderItem;
 import com.mictech.repository.ItemRepository;
 import com.mictech.repository.OrderRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.mictech.model.OrderStatus.*;
 
 @Service
 @Slf4j
@@ -40,7 +44,7 @@ public class OrderProcessor {
         }
 
         dbOrder.setDeliveryAddress(orderRequest.getDeliveryAddress());
-        dbOrder.setStatus(com.mictech.model.OrderStatus.SAVED);
+        dbOrder.setStatus(SAVED);
 
         if (orderRequest.getItems() != null) {
             for (com.mictech.api.model.OrderItem apiOrderItem : orderRequest.getItems()) {
@@ -59,7 +63,7 @@ public class OrderProcessor {
                         dbOrderItem.setQuantity(apiOrderItem.getQuantity());
                         return dbOrderItem;
                     })
-                    .collect(Collectors.toList()));
+                    .toList());
         }
 
         dbOrder = orderRepository.save(dbOrder);
@@ -74,7 +78,7 @@ public class OrderProcessor {
         com.mictech.model.Order dbOrder = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
 
-        if (dbOrder.getStatus() == com.mictech.model.OrderStatus.PURCHASED) {
+        if (dbOrder.getStatus() == PURCHASED) {
             throw new RuntimeException("Order " + orderId + " has already been purchased.");
         }
 
@@ -93,18 +97,18 @@ public class OrderProcessor {
 
         if (sufficientStock) {
             if (dbOrder.getItems() != null) {
-                for (com.mictech.model.OrderItem orderItem : dbOrder.getItems()) {
-                    com.mictech.model.Item item = itemRepository.findById(orderItem.getItemId()).get(); // Already checked
+                for (OrderItem orderItem : dbOrder.getItems()) {
+                    Item item = itemRepository.findById(orderItem.getItemId()).get(); // Already checked
                     int newQuantity = item.getQuantity() - orderItem.getQuantity();
                     item.setQuantity(newQuantity);
                     itemRepository.save(item);
                     log.info("Updated inventory for item {}: new quantity is {}", item.getId(), newQuantity);
                 }
             }
-            dbOrder.setStatus(com.mictech.model.OrderStatus.PURCHASED);
+            dbOrder.setStatus(PURCHASED);
             log.info("Order {} has been purchased.", dbOrder.getId());
         } else {
-            dbOrder.setStatus(com.mictech.model.OrderStatus.HELD);
+            dbOrder.setStatus(HELD);
             log.warn("Order {} has been put on hold due to insufficient stock.", dbOrder.getId());
         }
 
@@ -140,7 +144,7 @@ public class OrderProcessor {
      */
     @Deprecated
     private void shipItems(com.mictech.model.Order dbOrder) {
-        if (dbOrder.getStatus() == com.mictech.model.OrderStatus.PURCHASED && dbOrder.getItems() != null) {
+        if (dbOrder.getStatus() == PURCHASED && dbOrder.getItems() != null) {
             for (com.mictech.model.OrderItem orderItem : dbOrder.getItems()) {
                 com.mictech.model.Item item = itemRepository.findById(orderItem.getItemId())
                         .orElseThrow(() -> new RuntimeException("Item not found: " + orderItem.getItemId()));
@@ -152,7 +156,7 @@ public class OrderProcessor {
     }
 
     private void shipItemsUsingVirtualThreads(com.mictech.model.Order dbOrder) {
-        if (dbOrder.getStatus() == com.mictech.model.OrderStatus.PURCHASED && dbOrder.getItems() != null) {
+        if (dbOrder.getStatus() == PURCHASED && dbOrder.getItems() != null) {
             for (com.mictech.model.OrderItem orderItem : dbOrder.getItems()) {
                 com.mictech.model.Item item = itemRepository.findById(orderItem.getItemId())
                         .orElseThrow(() -> new RuntimeException("Item not found: " + orderItem.getItemId()));
