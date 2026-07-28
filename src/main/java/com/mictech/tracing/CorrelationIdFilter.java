@@ -20,7 +20,8 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
     private static final String TRACE_ID_HEADER = "Trace-Id";
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         String correlationId = request.getHeader(CORRELATION_ID_HEADER);
         Context currentContext = Context.current();
 
