@@ -1,0 +1,39 @@
+# Dependabot configuration file
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  # Maintain Maven dependencies
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      time: "04:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 10
+    groups:
+      spring-dependencies:
+        patterns:
+          - "org.springframework.boot*"
+          - "io.micrometer*"
+      test-dependencies:
+        patterns:
+          - "org.testcontainers*"
+          - "org.junit*"
+      opentelemetry-dependencies:
+        patterns:
+          - "io.opentelemetry*"
+          - "io.opentelemetry.instrumentation*"
+
+  # Maintain GitHub Actions workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      time: "04:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 10
+    groups:
+      actions:
+        patterns:
+          - "*"
