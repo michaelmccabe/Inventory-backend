@@ -5,7 +5,7 @@ It provides a solid foundation with a clear project structure, robust testing fa
 
 ## Core Technologies
 
-*   **Java 21**
+*   **Java 25**
 *   **Spring Boot 3:** For building the application.
 *   **Spring Data JPA:** For data persistence.
 *   **PostgreSQL:** As the relational database.
@@ -61,14 +61,7 @@ Orders can be in one of the following statuses:
 
 ## Virtual Threads for Concurrent Shipping
 
-This project includes an optional feature to process the shipping of an order using Java's new virtual threads, introduced in Java 21. Virtual threads are a lightweight implementation of threads provided by the JDK, designed to dramatically reduce the effort of writing, maintaining, 
-and observing high-throughput concurrent applications. For more information, see the official [Java documentation on Virtual Threads](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html).
-
-The `testVirtualVsPlatformThreadPerformance` test in `VirtualThreadShippingTest.java` is designed to compare the performance of shipping a large order (1000 items) using both traditional platform threads and new virtual threads. It times both operations and logs the results.
-
-In this specific use case, which is heavily CPU-bound (logging to the console), the performance difference between virtual and platform threads may not be substantial. In fact, you might observe that platform threads are sometimes faster. 
-
-However, the real power of virtual threads shines in I/O-bound tasks, where the ability to easily parallelise a high number of operations can lead to significant performance gains.
+Order shipping in this project is processed concurrently using Java virtual threads. Virtual threads are a lightweight implementation of threads provided by the JDK, designed to dramatically reduce the effort of writing, maintaining, and observing high-throughput concurrent applications. For more information, see the official [Java documentation on Virtual Threads](https://docs.oracle.com/en/java/javase/21/core/virtual-threads.html).
 
 ## Database Migrations
 

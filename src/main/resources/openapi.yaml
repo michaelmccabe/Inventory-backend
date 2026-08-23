@@ -194,12 +194,6 @@ paths:
           schema:
             type: integer
             format: int64
-        - name: useVirtualThreads
-          in: query
-          required: false
-          schema:
-            type: boolean
-            default: true
       responses:
         '200':
           description: The purchased order

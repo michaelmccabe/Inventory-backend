@@ -40,8 +40,8 @@ public class OrderController implements OrdersApi {
 
     @Override
     @Observed(name = "purchase.order", contextualName = "purchase-order")
-    public ResponseEntity<Order> purchaseOrder(Long id, Boolean useVirtualThreads) {
-        Order purchasedOrder = orderProcessor.purchaseOrder(id, useVirtualThreads);
+    public ResponseEntity<Order> purchaseOrder(Long id) {
+        Order purchasedOrder = orderProcessor.purchaseOrder(id);
         return ResponseEntity.ok(purchasedOrder);
     }
 
