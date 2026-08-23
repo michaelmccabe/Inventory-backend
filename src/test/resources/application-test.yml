@@ -5,7 +5,7 @@ management:
   otlp:
     tracing:
       endpoint: http://localhost:4317/v1/traces  # Full HTTP path for OTLP
-      transport: http/protobuf  # CRITICAL: Forces HTTP/Protobuf (no gRPC)
+      transport: http  # Forces HTTP
   endpoints:
     web:
       exposure:
