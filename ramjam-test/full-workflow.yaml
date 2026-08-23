@@ -1,0 +1,168 @@
+# Inventory Full End-to-End Workflow Test
+metadata:
+  name: "Inventory Full Workflow Test"
+  author: "michaelmccabe"
+  description: "End-to-end integration test demonstrating multi-item orders, virtual thread purchase, correlation ID, and inventory tracking"
+
+config:
+  base_url: "http://127.0.0.1:8080"
+
+workflow:
+  - step: "health-check"
+    description: "Verify the inventory service is up and healthy"
+    request:
+      method: "GET"
+      url: "${base_url}/actuator/health"
+      headers:
+        Accept: "application/json"
+    expect:
+      status: 200
+      json_path_match:
+        - path: "status"
+          value: "UP"
+    output:
+      print: "Inventory Service is healthy"
+
+  - step: "create-laptop-inventory"
+    description: "Stock laptop inventory"
+    request:
+      method: "POST"
+      url: "${base_url}/api/items"
+      headers:
+        Content-Type: "application/json"
+        Accept: "application/json"
+      body:
+        name: "Developer Laptop X1"
+        quantity: 100
+    expect:
+      status: 201
+      json_path_match:
+        - path: "name"
+          value: "Developer Laptop X1"
+        - path: "quantity"
+          value: 100
+    capture:
+      - json_path: "id"
+        as: "laptop_id"
+    output:
+      print: "Created Laptop item with ID: ${laptop_id}"
+
+  - step: "create-monitor-inventory"
+    description: "Stock monitor inventory"
+    request:
+      method: "POST"
+      url: "${base_url}/api/items"
+      headers:
+        Content-Type: "application/json"
+        Accept: "application/json"
+      body:
+        name: "4K Curved Monitor 34"
+        quantity: 50
+    expect:
+      status: 201
+      json_path_match:
+        - path: "name"
+          value: "4K Curved Monitor 34"
+        - path: "quantity"
+          value: 50
+    capture:
+      - json_path: "id"
+        as: "monitor_id"
+    output:
+      print: "Created Monitor item with ID: ${monitor_id}"
+
+  - step: "create-multi-item-order"
+    description: "Place a multi-item order in SAVED status"
+    request:
+      method: "POST"
+      url: "${base_url}/api/orders"
+      headers:
+        Content-Type: "application/json"
+        Accept: "application/json"
+        X-Correlation-ID: "ramjam-e2e-wf-1"
+      body:
+        deliveryAddress: "100 Enterprise Way, Floor 4"
+        items:
+          - itemId: ${laptop_id}
+            quantity: 15
+          - itemId: ${monitor_id}
+            quantity: 10
+    expect:
+      status: 201
+      json_path_match:
+        - path: "deliveryAddress"
+          value: "100 Enterprise Way, Floor 4"
+        - path: "status"
+          value: "SAVED"
+        - path: "items[0].quantity"
+          value: 15
+        - path: "items[1].quantity"
+          value: 10
+    capture:
+      - json_path: "id"
+        as: "order_id"
+    output:
+      print: "Created multi-item order with ID: ${order_id}"
+
+  - step: "verify-order-details"
+    description: "Verify order details by ID"
+    request:
+      method: "GET"
+      url: "${base_url}/api/orders/${order_id}"
+      headers:
+        Accept: "application/json"
+    expect:
+      status: 200
+      json_path_match:
+        - path: "id"
+          value: ${order_id}
+        - path: "status"
+          value: "SAVED"
+    output:
+      print: "Verified order ${order_id} details"
+
+  - step: "purchase-order-with-virtual-threads"
+    description: "Purchase order using virtual threads"
+    request:
+      method: "POST"
+      url: "${base_url}/api/orders/${order_id}/purchase?useVirtualThreads=true"
+      headers:
+        Accept: "application/json"
+        X-Correlation-ID: "ramjam-e2e-wf-1"
+    expect:
+      status: 200
+      json_path_match:
+        - path: "status"
+          value: "PURCHASED"
+    output:
+      print: "Successfully completed purchase for order ${order_id}"
+
+  - step: "verify-laptop-stock-decrement"
+    description: "Verify laptop inventory decreased to 85 (100 - 15)"
+    request:
+      method: "GET"
+      url: "${base_url}/api/items/${laptop_id}"
+      headers:
+        Accept: "application/json"
+    expect:
+      status: 200
+      json_path_match:
+        - path: "quantity"
+          value: 85
+    output:
+      print: "Laptop stock successfully decremented to 85"
+
+  - step: "verify-monitor-stock-decrement"
+    description: "Verify monitor inventory decreased to 40 (50 - 10)"
+    request:
+      method: "GET"
+      url: "${base_url}/api/items/${monitor_id}"
+      headers:
+        Accept: "application/json"
+    expect:
+      status: 200
+      json_path_match:
+        - path: "quantity"
+          value: 40
+    output:
+      print: "Monitor stock successfully decremented to 40"

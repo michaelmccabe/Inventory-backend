@@ -1,0 +1,141 @@
+# Order lifecycle and purchase workflow test
+metadata:
+  name: "Order Lifecycle and Purchase Workflow"
+  author: "michaelmccabe"
+  description: "Test creating an order, updating delivery details, purchasing the order, and verifying stock deduction"
+
+config:
+  base_url: "http://127.0.0.1:8080"
+
+workflow:
+  - step: "create-inventory-item"
+    description: "Create an item in stock"
+    request:
+      method: "POST"
+      url: "${base_url}/api/items"
+      headers:
+        Content-Type: "application/json"
+        Accept: "application/json"
+      body:
+        name: "Wireless Ergonomic Mouse"
+        quantity: 50
+    expect:
+      status: 201
+      json_path_match:
+        - path: "name"
+          value: "Wireless Ergonomic Mouse"
+        - path: "quantity"
+          value: 50
+    capture:
+      - json_path: "id"
+        as: "mouse_id"
+    output:
+      print: "Stocked item with ID: ${mouse_id}"
+
+  - step: "create-order"
+    description: "Create an order in SAVED status"
+    request:
+      method: "POST"
+      url: "${base_url}/api/orders"
+      headers:
+        Content-Type: "application/json"
+        Accept: "application/json"
+      body:
+        deliveryAddress: "123 Tech Lane, Silicon Valley"
+        items:
+          - itemId: ${mouse_id}
+            quantity: 10
+    expect:
+      status: 201
+      json_path_match:
+        - path: "deliveryAddress"
+          value: "123 Tech Lane, Silicon Valley"
+        - path: "status"
+          value: "SAVED"
+    capture:
+      - json_path: "id"
+        as: "order_id"
+    output:
+      print: "Created order with ID: ${order_id} in SAVED status"
+
+  - step: "get-order-by-id"
+    description: "Retrieve order by ID"
+    request:
+      method: "GET"
+      url: "${base_url}/api/orders/${order_id}"
+      headers:
+        Accept: "application/json"
+    expect:
+      status: 200
+      json_path_match:
+        - path: "id"
+          value: ${order_id}
+        - path: "status"
+          value: "SAVED"
+    output:
+      print: "Retrieved order ${order_id}"
+
+  - step: "get-all-orders"
+    description: "Retrieve list of all orders"
+    request:
+      method: "GET"
+      url: "${base_url}/api/orders"
+      headers:
+        Accept: "application/json"
+    expect:
+      status: 200
+    output:
+      print: "Successfully listed orders"
+
+  - step: "update-order"
+    description: "Update order delivery address and quantity before purchase"
+    request:
+      method: "PUT"
+      url: "${base_url}/api/orders/${order_id}"
+      headers:
+        Content-Type: "application/json"
+        Accept: "application/json"
+      body:
+        deliveryAddress: "456 Innovation Blvd, Tech Park"
+        items:
+          - itemId: ${mouse_id}
+            quantity: 12
+    expect:
+      status: 200
+      json_path_match:
+        - path: "deliveryAddress"
+          value: "456 Innovation Blvd, Tech Park"
+        - path: "status"
+          value: "SAVED"
+    output:
+      print: "Updated order ${order_id}"
+
+  - step: "purchase-order"
+    description: "Purchase order and trigger inventory decrement"
+    request:
+      method: "POST"
+      url: "${base_url}/api/orders/${order_id}/purchase"
+      headers:
+        Accept: "application/json"
+    expect:
+      status: 200
+      json_path_match:
+        - path: "status"
+          value: "PURCHASED"
+    output:
+      print: "Successfully purchased order ${order_id}"
+
+  - step: "verify-inventory-decrement"
+    description: "Verify that inventory was decremented correctly (50 - 12 = 38)"
+    request:
+      method: "GET"
+      url: "${base_url}/api/items/${mouse_id}"
+      headers:
+        Accept: "application/json"
+    expect:
+      status: 200
+      json_path_match:
+        - path: "quantity"
+          value: 38
+    output:
+      print: "Confirmed inventory quantity decremented to 38"

@@ -86,6 +86,10 @@ This template is configured with a comprehensive testing strategy.
     *   This allows tests to run against a live, ephemeral database, providing a high degree of confidence that the application will behave correctly in a production-like environment.
     *   The `OrderControllerIntegrationTest` provides a comprehensive set of tests for the order management workflow, including success and failure scenarios.
 *   **Test-specific Properties:** A separate configuration file at `src/test/resources/application-test.yml` is used to configure the application context for the testing environment, such as setting the datasource URL to point to the Testcontainer.
+*   **Ramjam API Workflow Testing:** Declarative End-to-End API workflow testing using [Ramjam](https://github.com/michaelmccabe/ramjam).
+    *   Workflow test definitions are organized in the `ramjam-test/` directory.
+    *   Executed automatically as part of the GitHub Actions CI pipeline (`.github/workflows/integration-tests.yml`).
+    *   See [How to Test with Ramjam](ramjam-test/how-to-test-with-ramjam.md) for usage, examples, and running instructions.
 
 ## Observability
 

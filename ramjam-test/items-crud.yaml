@@ -1,0 +1,103 @@
+# Items CRUD lifecycle workflow
+metadata:
+  name: "Items CRUD Workflow"
+  author: "michaelmccabe"
+  description: "Test full CRUD operations on inventory items"
+
+config:
+  base_url: "http://127.0.0.1:8080"
+
+workflow:
+  - step: "create-item"
+    description: "Create a new inventory item"
+    request:
+      method: "POST"
+      url: "${base_url}/api/items"
+      headers:
+        Content-Type: "application/json"
+        Accept: "application/json"
+      body:
+        name: "Mechanical Keyboard Pro"
+        quantity: 75
+    expect:
+      status: 201
+      json_path_match:
+        - path: "name"
+          value: "Mechanical Keyboard Pro"
+        - path: "quantity"
+          value: 75
+    capture:
+      - json_path: "id"
+        as: "item_id"
+    output:
+      print: "Created item with ID: ${item_id}"
+
+  - step: "get-item-by-id"
+    description: "Fetch the created item by ID"
+    request:
+      method: "GET"
+      url: "${base_url}/api/items/${item_id}"
+      headers:
+        Accept: "application/json"
+    expect:
+      status: 200
+      json_path_match:
+        - path: "name"
+          value: "Mechanical Keyboard Pro"
+        - path: "quantity"
+          value: 75
+    output:
+      print: "Successfully retrieved item ${item_id}"
+
+  - step: "get-all-items"
+    description: "Fetch list of all items"
+    request:
+      method: "GET"
+      url: "${base_url}/api/items"
+      headers:
+        Accept: "application/json"
+    expect:
+      status: 200
+    output:
+      print: "Successfully listed all items"
+
+  - step: "update-item"
+    description: "Update the item details"
+    request:
+      method: "PUT"
+      url: "${base_url}/api/items/${item_id}"
+      headers:
+        Content-Type: "application/json"
+        Accept: "application/json"
+      body:
+        name: "Mechanical Keyboard RGB"
+        quantity: 80
+    expect:
+      status: 200
+      json_path_match:
+        - path: "name"
+          value: "Mechanical Keyboard RGB"
+        - path: "quantity"
+          value: 80
+    output:
+      print: "Successfully updated item ${item_id}"
+
+  - step: "delete-item"
+    description: "Delete the created item"
+    request:
+      method: "DELETE"
+      url: "${base_url}/api/items/${item_id}"
+    expect:
+      status: 204
+    output:
+      print: "Successfully deleted item ${item_id}"
+
+  - step: "verify-item-deleted"
+    description: "Ensure deleted item returns 404"
+    request:
+      method: "GET"
+      url: "${base_url}/api/items/${item_id}"
+    expect:
+      status: 404
+    output:
+      print: "Confirmed item ${item_id} is no longer present"
