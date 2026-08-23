@@ -1,0 +1,116 @@
+# Insufficient stock handling and HELD order state test
+metadata:
+  name: "Order Stock Validation & HELD Workflow"
+  author: "michaelmccabe"
+  description: "Test rejection of orders exceeding stock, and order transition to HELD status when stock depletes before purchase"
+
+config:
+  base_url: "http://127.0.0.1:8080"
+
+workflow:
+  - step: "create-limited-item"
+    description: "Create an item with limited stock of 5"
+    request:
+      method: "POST"
+      url: "${base_url}/api/items"
+      headers:
+        Content-Type: "application/json"
+      body:
+        name: "Limited Gaming Headset"
+        quantity: 5
+    expect:
+      status: 201
+      json_path_match:
+        - path: "name"
+          value: "Limited Gaming Headset"
+        - path: "quantity"
+          value: 5
+    capture:
+      - json_path: "id"
+        as: "headset_id"
+    output:
+      print: "Created limited stock item with ID: ${headset_id}"
+
+  - step: "attempt-order-exceeding-stock"
+    description: "Attempt to create order for 10 units when only 5 in stock"
+    request:
+      method: "POST"
+      url: "${base_url}/api/orders"
+      headers:
+        Content-Type: "application/json"
+      body:
+        deliveryAddress: "789 High Demand Way"
+        items:
+          - itemId: ${headset_id}
+            quantity: 10
+    expect:
+      status: 400
+    output:
+      print: "Correctly rejected order exceeding available inventory"
+
+  - step: "create-valid-order"
+    description: "Create an order matching exact available stock (5 units)"
+    request:
+      method: "POST"
+      url: "${base_url}/api/orders"
+      headers:
+        Content-Type: "application/json"
+      body:
+        deliveryAddress: "789 High Demand Way"
+        items:
+          - itemId: ${headset_id}
+            quantity: 5
+    expect:
+      status: 201
+      json_path_match:
+        - path: "status"
+          value: "SAVED"
+    capture:
+      - json_path: "id"
+        as: "held_order_id"
+    output:
+      print: "Created order ID ${held_order_id} in SAVED status"
+
+  - step: "simulate-stock-reduction"
+    description: "Directly reduce item quantity to 2 before purchase"
+    request:
+      method: "PUT"
+      url: "${base_url}/api/items/${headset_id}"
+      headers:
+        Content-Type: "application/json"
+      body:
+        name: "Limited Gaming Headset"
+        quantity: 2
+    expect:
+      status: 200
+      json_path_match:
+        - path: "quantity"
+          value: 2
+    output:
+      print: "Stock reduced to 2 units"
+
+  - step: "purchase-order-triggers-held"
+    description: "Purchase order when stock is insufficient, resulting in HELD status"
+    request:
+      method: "POST"
+      url: "${base_url}/api/orders/${held_order_id}/purchase"
+    expect:
+      status: 200
+      json_path_match:
+        - path: "status"
+          value: "HELD"
+    output:
+      print: "Order ${held_order_id} status correctly transitioned to HELD"
+
+  - step: "verify-stock-not-decremented"
+    description: "Verify that inventory was not decremented when order went to HELD"
+    request:
+      method: "GET"
+      url: "${base_url}/api/items/${headset_id}"
+    expect:
+      status: 200
+      json_path_match:
+        - path: "quantity"
+          value: 2
+    output:
+      print: "Confirmed inventory quantity remains untouched at 2"

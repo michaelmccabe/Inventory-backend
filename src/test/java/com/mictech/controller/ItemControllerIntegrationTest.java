@@ -92,6 +92,6 @@ public class ItemControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(item2)))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$").value("Item with name 'Unique Item' already exists"));
+                .andExpect(jsonPath("$.message").value("Item with name 'Unique Item' already exists"));
     }
 }

@@ -1,0 +1,24 @@
+# Health check workflow for Inventory Service
+metadata:
+  name: "Health Check"
+  author: "michaelmccabe"
+  description: "Verify that the Inventory Service is healthy and responsive"
+
+config:
+  base_url: "http://127.0.0.1:8080"
+
+workflow:
+  - step: "check-actuator-health"
+    description: "Verify Spring Boot actuator health endpoint returns UP"
+    request:
+      method: "GET"
+      url: "${base_url}/actuator/health"
+      headers:
+        Accept: "application/json"
+    expect:
+      status: 200
+      json_path_match:
+        - path: "status"
+          value: "UP"
+    output:
+      print: "Inventory Service is healthy and ready to accept requests"

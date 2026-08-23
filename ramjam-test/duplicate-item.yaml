@@ -1,0 +1,47 @@
+# Duplicate item constraint test
+metadata:
+  name: "Duplicate Item Rejection"
+  author: "michaelmccabe"
+  description: "Verify that creating an item with an existing name is rejected with 409 Conflict"
+
+config:
+  base_url: "http://127.0.0.1:8080"
+
+workflow:
+  - step: "create-first-item"
+    description: "Create an item with a unique name"
+    request:
+      method: "POST"
+      url: "${base_url}/api/items"
+      headers:
+        Content-Type: "application/json"
+      body:
+        name: "Ultra HD Monitor 4K"
+        quantity: 15
+    expect:
+      status: 201
+      json_path_match:
+        - path: "name"
+          value: "Ultra HD Monitor 4K"
+        - path: "quantity"
+          value: 15
+    capture:
+      - json_path: "id"
+        as: "item_id"
+    output:
+      print: "Created initial item with ID: ${item_id}"
+
+  - step: "create-duplicate-item"
+    description: "Attempt to create another item with the exact same name"
+    request:
+      method: "POST"
+      url: "${base_url}/api/items"
+      headers:
+        Content-Type: "application/json"
+      body:
+        name: "Ultra HD Monitor 4K"
+        quantity: 25
+    expect:
+      status: 409
+    output:
+      print: "Correctly rejected duplicate item creation with 409 Conflict"

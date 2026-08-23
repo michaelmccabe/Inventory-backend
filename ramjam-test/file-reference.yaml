@@ -1,0 +1,38 @@
+# External body file test
+metadata:
+  name: "Body File Reference Test"
+  author: "michaelmccabe"
+  description: "Test creating an item using external JSON body file"
+
+config:
+  base_url: "http://127.0.0.1:8080"
+
+workflow:
+  - step: "create-item-from-file"
+    description: "Create an item with payload from external file"
+    request:
+      method: "POST"
+      url: "${base_url}/api/items"
+      body_file: "payloads/create-item.json"
+    expect:
+      status: 201
+      json_path_match:
+        - path: "name"
+          value: "External Payload Item"
+        - path: "quantity"
+          value: 60
+    capture:
+      - json_path: "id"
+        as: "ext_item_id"
+    output:
+      print: "Created item from file with ID: ${ext_item_id}"
+
+  - step: "clean-up-item"
+    description: "Delete the created item"
+    request:
+      method: "DELETE"
+      url: "${base_url}/api/items/${ext_item_id}"
+    expect:
+      status: 204
+    output:
+      print: "Cleaned up external payload item"
