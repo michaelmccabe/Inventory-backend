@@ -125,7 +125,7 @@ workflow:
     description: "Purchase order using virtual threads"
     request:
       method: "POST"
-      url: "${base_url}/api/orders/${order_id}/purchase?useVirtualThreads=true"
+      url: "${base_url}/api/orders/${order_id}/purchase"
       headers:
         Accept: "application/json"
         X-Correlation-ID: "ramjam-e2e-wf-1"

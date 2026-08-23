@@ -73,7 +73,7 @@ public class OrderProcessor {
     }
 
     @Transactional
-    public Order purchaseOrder(Long orderId, boolean useVirtualThreads) {
+    public Order purchaseOrder(Long orderId) {
         log.info("Processing purchase for order {}...", orderId);
         com.mictech.model.Order dbOrder = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
@@ -114,11 +114,7 @@ public class OrderProcessor {
 
         dbOrder = orderRepository.save(dbOrder);
 
-        if (useVirtualThreads) {
-            shipItemsUsingVirtualThreads(dbOrder);
-        } else {
-            shipItems(dbOrder);
-        }
+        shipItems(dbOrder);
 
         return mapToApiOrder(dbOrder);
     }
@@ -139,23 +135,7 @@ public class OrderProcessor {
                 .map(this::mapToApiOrder);
     }
 
-    /**
-     * @deprecated Use {@link #shipItemsUsingVirtualThreads(com.mictech.model.Order)} instead.
-     */
-    @Deprecated
     private void shipItems(com.mictech.model.Order dbOrder) {
-        if (dbOrder.getStatus() == PURCHASED && dbOrder.getItems() != null) {
-            for (com.mictech.model.OrderItem orderItem : dbOrder.getItems()) {
-                com.mictech.model.Item item = itemRepository.findById(orderItem.getItemId())
-                        .orElseThrow(() -> new RuntimeException("Item not found: " + orderItem.getItemId()));
-                for (int i = 1; i <= orderItem.getQuantity(); i++) {
-                    log.info("Order shipping: item type {} and count = {} of {}", item.getName(), i, orderItem.getQuantity());
-                }
-            }
-        }
-    }
-
-    private void shipItemsUsingVirtualThreads(com.mictech.model.Order dbOrder) {
         if (dbOrder.getStatus() == PURCHASED && dbOrder.getItems() != null) {
             for (com.mictech.model.OrderItem orderItem : dbOrder.getItems()) {
                 com.mictech.model.Item item = itemRepository.findById(orderItem.getItemId())

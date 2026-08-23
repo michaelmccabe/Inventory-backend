@@ -36,3 +36,5 @@ build/
 further-development/
 local-dev/logs
 
+### SDKMAN ###
+.sdkmanrc

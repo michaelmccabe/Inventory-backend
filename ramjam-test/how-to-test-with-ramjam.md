@@ -20,7 +20,7 @@ Ramjam is a declarative CLI testing tool written in Go that executes HTTP API wo
    ```bash
    docker compose -f local-dev/docker-compose.yml up -d postgres
    ```
-2. **Java 21** & **Maven Wrapper** (`./mvnw`).
+2. **Java 25** & **Maven Wrapper** (`./mvnw`).
 3. **Ramjam CLI**:
    - Install using Go:
      ```bash
@@ -97,7 +97,7 @@ ramjam run ramjam-test/full-workflow.yaml
 | `orders-lifecycle.yaml` | Creates item, submits order (`SAVED`), updates address, purchases order (`PURCHASED`), and validates inventory deduction. |
 | `order-stock-validation.yaml` | Tests insufficient stock rejection (`400 Bad Request`) and order hold behavior (`HELD`). |
 | `file-reference.yaml` | Tests payload loading from external file (`payloads/create-item.json`). |
-| `full-workflow.yaml` | Comprehensive multi-item ordering, virtual threads purchase (`?useVirtualThreads=true`), correlation ID header passing, and final stock assertions. |
+| `full-workflow.yaml` | Comprehensive multi-item ordering, order purchase with virtual threads, correlation ID header passing, and final stock assertions. |
 
 ---
 
