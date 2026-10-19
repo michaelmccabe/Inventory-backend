@@ -1,0 +1,33 @@
+# Enables GitHub auto-merge on Dependabot PRs. The PR is merged only once all
+# required status checks on `main` pass (configured via branch protection).
+#
+# Prerequisites (repo settings):
+#   1. Settings > General > Pull Requests > "Allow auto-merge" enabled.
+#   2. Branch protection / ruleset on `main` requiring the status checks
+#      "build" and "integration-tests". Without required checks, auto-merge
+#      would merge immediately without waiting for the build.
+
+name: Dependabot auto-merge
+
+on: pull_request
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'michaelmccabe/Inventory-backend'
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v3
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Enable auto-merge for Dependabot PRs
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
