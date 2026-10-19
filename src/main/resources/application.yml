@@ -11,19 +11,23 @@ spring:
     open-in-view: false  # Fixes the WARN (prod best practice)
   flyway:
     locations: classpath:db/migration
-    threads:
-      virtual:
-        enabled: true
+  threads:
+    virtual:
+      enabled: true
 
 management:
   tracing:
     sampling:
       probability: 1.0  # 100% capture
-  otlp:
+  opentelemetry:
     tracing:
-      endpoint: http://127.0.0.1:4318/v1/traces  # HTTP + path
+      export:
+        otlp:
+          endpoint: http://127.0.0.1:4318/v1/traces  # HTTP + path
     logging:
-      endpoint: http://127.0.0.1:4318/v1/logs  # HTTP + path
+      export:
+        otlp:
+          endpoint: http://127.0.0.1:4318/v1/logs  # HTTP + path
   # Batch tuning to avoid size errors
   metrics:
     export:

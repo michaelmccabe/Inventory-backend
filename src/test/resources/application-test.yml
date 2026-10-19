@@ -2,17 +2,19 @@ management:
   tracing:
     sampling:
       probability: 1.0  # CRITICAL: Activates tracer + 100% capture
-  otlp:
+  opentelemetry:
     tracing:
-      endpoint: http://localhost:4317/v1/traces  # Full HTTP path for OTLP
-      transport: http  # Forces HTTP
+      export:
+        otlp:
+          endpoint: http://localhost:4317/v1/traces  # Full HTTP path for OTLP
+          transport: http  # Forces HTTP
   endpoints:
     web:
       exposure:
         include: health,info,trace
   endpoint:
     health:
-      enabled: true
+      access: unrestricted
 
 logging:
   pattern:

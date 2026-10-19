@@ -15,7 +15,7 @@ import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 
 import java.util.Collections;
@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class VirtualThreadShippingTest extends TestClass {
 
     @Container
-    private static final PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:15-alpine");
+    private static final PostgreSQLContainer postgreSQLContainer = new PostgreSQLContainer("postgres:15-alpine");
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry registry) {
